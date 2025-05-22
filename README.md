@@ -195,7 +195,7 @@
 
 코드 링크:
 
-- ResNet50 모델 학습 코드
+- ResNet50 모델 학습 & 데이터 증강_비교 테스트
 
 [Google Colab](https://colab.research.google.com/drive/1KaoYjCGbDyiXGhz4ub2yvm5UlFvT-TE9?usp=sharing)
 
