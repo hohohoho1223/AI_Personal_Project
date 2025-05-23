@@ -4,6 +4,22 @@
 - 개발인원 : 1명
 - "[카카오_부트캠프]_개인과제2_데이터_증강_비교" -> "[카카오_부트캠프]_개인과제2_CNN_1" -> "[카카오_부트캠프]_개인과제2_CNN_2" 순으로 코드 진행
 
+## 목차
+
+1. [서론](#1-서론)  
+2. [데이터셋 설명](#2-데이터셋-설명)  
+3. [모델 설명](#3-모델-설명)  
+4. [실험 방법](#4-실험-방법)  
+   - [GoogLeNet 성능 개선](#googlenet-성능-개선)  
+     - [1차 파인튜닝 (use_auxtrue-freeze_basefalse)](#1차-파인튜닝-use_auxtrue-freeze_basefalse)  
+     - [2차 파인튜닝 (use_auxtrue-freeze_basetrue)](#2차-파인튜닝-use_auxtrue-freeze_basetrue)  
+     - [Loss/Scheduler 변경](#lossscheduler-변경)  
+       - [Label Smoothing Loss 적용](#label-smoothing-loss-적용)  
+       - [Label Smoothing--reducelronplateau-스케줄러-적용](#label-smoothing--reducelronplateau-스케줄러-적용)  
+5. [실험 결과](#5-실험-결과)  
+6. [결론](#6-결론)  
+7. [코드 링크](#7-코드-링크)
+
 ## 1. 서론
 
 
@@ -54,13 +70,13 @@
   
 ## GoogLeNet 성능 개선
 
-### 1. 1차 파인튜닝 `(use_aux=True, freeze_base=False)`
+### 4.1. 1차 파인튜닝 `(use_aux=True, freeze_base=False)`
 - aux1,aux2 를 출력 레이서 클래스 수 `num_classes` 에 맞춰 재정의 하였음
 - **`freeze_base=False`** 덕분에 실제로는 이미 전체 파라미터가 `requires_grad=True`인 상태임   
     → 아무 것도 얼리지(freeze) 않았기 때문에, 전체 파라미터가 기본적으로 학습 대상이 된다는 뜻    
 - 따라서 위 코드 함수는 유연하게 **전체 파인튜닝**도, **Gradual Unfreeze** 초기도 모두 커버할 수 있는 구조
 
-### 2. 2차 파인튜닝 `(use_aux=True, freeze_base=True)`
+### 4.2. 2차 파인튜닝 `(use_aux=True, freeze_base=True)`
 - 한번에 두 모델 생성하여 두 전략을 동시에 진행하였다.
     - **Feature Extractor 방식**
         - **백본(Conv Layer)은 고정(freeze)** → `requires_grad = False`
@@ -98,7 +114,7 @@
         따라서 Feature Extractor 전략은 학습 범위가 제한적이기 때문에, 데이터의 특성과 도메인 간 차이를 충분히 반영하기 어려웠으며, 이는 전체적인 분류 성능의 하락으로 보임
         
 
-### 3. Loss/Scheduler 변경
+### 4.3. Loss/Scheduler 변경
 
 - **Label Smoothing Loss 적용**
     - Loss Function은 **정답에 얼마나 가까운지 수치화 하는 것**이 핵심이다.
@@ -139,9 +155,7 @@
     - 총 9가지 모델에 대하여 총 테스트 정확도를 시각화 하였다(아래).
         
 
-## 4. 실험 결과
-
----
+## 5. 실험 결과
 
 - 모델별 테스트 정확도 결과는 아래와 같다
     
@@ -166,9 +180,7 @@
     - Gradual Unfreeze 전략은 **label smoothing 없이 적용** 시 더 유리할 수도 있음
     - 정규화/스케줄링 기법이 항상 이점이 되지 않음을 보여주는 예시 포함
 
-## 5. 결론
-
----
+## 6. 결론
 
 - 본 프로젝트는 여러 모델기법중, 낮은 정확도를 보인 GoogLeNet의 기본 구조에서 출발하여,보조 분류기 활성화, Gradual Unfreeze, Label Smoothing, 학습률 스케줄링(ReduceLROnPlateau) 기법을 점진적으로 적용하면서 모델 성능을 단계적으로 향상시키는 것을 목표로 하였음
     
@@ -185,9 +197,8 @@
     따라서 최적 전략은 기본 `GoogLeNet` 모델에 **Label Smoothing 적용** (googlenet_smooth) 하거나 **1차 파인튜닝 + Label Smoothing + ReduceLROnPlateau 조합**(googlenet_finetuned_smooth_rlrop)으로 하는 것이 적절하다고 판단된다.
     
 
----
 
-코드 링크:
+## 7. 코드 링크
 
 - ResNet50 모델 학습 & 데이터 증강_비교 테스트
 
